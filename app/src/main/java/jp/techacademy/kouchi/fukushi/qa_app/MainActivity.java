@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
+import android.support.design.widget.Snackbar;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -32,15 +33,27 @@ public class MainActivity extends AppCompatActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                // --- ここから ---
+                // ジャンルを選択していない場合（mGenre == 0）はエラーを表示するだけ
+                if (mGenre == 0) {
+                    Snackbar.make(view, "ジャンルを選択して下さい", Snackbar.LENGTH_LONG).show();
+                    return;
+                }
+
                 // ログイン済みのユーザーを取得する
                 FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
 
-                // ログインしていなければログイン画面に遷移させる
                 if (user == null) {
+                    // ログインしていなければログイン画面に遷移させる
                     Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
                     startActivity(intent);
+                } else {
+                    // ジャンルを渡して質問作成画面を起動する
+                    Intent intent = new Intent(getApplicationContext(), QuestionSendActivity.class);
+                    intent.putExtra("genre", mGenre);
+                    startActivity(intent);
                 }
-
+                // --- ここまで修正 ---
             }
         });
 
