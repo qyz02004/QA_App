@@ -99,7 +99,9 @@ public class QuestionDetailActivity extends AppCompatActivity {
                     startActivity(intent);
                 } else {
                     // Questionを渡して回答作成画面を起動する
-                    // TODO:
+                    Intent intent = new Intent(getApplicationContext(), AnswerSendActivity.class);
+                    intent.putExtra("question", mQuestion);
+                    startActivity(intent);
                 }
             }
         });
