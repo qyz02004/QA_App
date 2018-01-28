@@ -32,8 +32,16 @@ import java.util.HashMap;
 
 public class MainActivity extends AppCompatActivity {
 
+    static final int GENRE_NONE = 0;
+    static final int GENRE_HOBBY = 1;
+    static final int GENRE_LIFE = 2;
+    static final int GENRE_HEALTH = 3;
+    static final int GENRE_COMPUTER = 4;
+    static final int GENRE_FAVERITE = -1;
+
     private Toolbar mToolbar;
-    private int mGenre = 0;
+
+    private int mGenre = GENRE_NONE;
 
     // --- ここから ---
     private DatabaseReference mDatabaseReference;
@@ -42,7 +50,10 @@ public class MainActivity extends AppCompatActivity {
     private ArrayList<Question> mQuestionArrayList;
     private QuestionsListAdapter mAdapter;
 
+
+    // データに追加・変化があった時に受け取る
     private ChildEventListener mEventListener = new ChildEventListener() {
+        // 質問が追加された時に呼ばれるメソッド
         @Override
         public void onChildAdded(DataSnapshot dataSnapshot, String s) {
             HashMap map = (HashMap) dataSnapshot.getValue();
@@ -76,6 +87,7 @@ public class MainActivity extends AppCompatActivity {
             mAdapter.notifyDataSetChanged();
         }
 
+        //
         @Override
         public void onChildChanged(DataSnapshot dataSnapshot, String s) {
             HashMap map = (HashMap) dataSnapshot.getValue();
@@ -130,8 +142,8 @@ public class MainActivity extends AppCompatActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                 // ジャンルを選択していない場合（mGenre == 0）はエラーを表示するだけ
-                if (mGenre == 0) {
+                 // ジャンルを選択していない場合（mGenre == GENRE_NONE）はエラーを表示するだけ
+                if (mGenre == GENRE_NONE) {
                     Snackbar.make(view, "ジャンルを選択して下さい", Snackbar.LENGTH_LONG).show();
                     return;
                 }
@@ -166,16 +178,19 @@ public class MainActivity extends AppCompatActivity {
 
                 if (id == R.id.nav_hobby) {
                     mToolbar.setTitle("趣味");
-                    mGenre = 1;
+                    mGenre = GENRE_HOBBY;
                 } else if (id == R.id.nav_life) {
                     mToolbar.setTitle("生活");
-                    mGenre = 2;
+                    mGenre = GENRE_LIFE;
                 } else if (id == R.id.nav_health) {
                     mToolbar.setTitle("健康");
-                    mGenre = 3;
+                    mGenre = GENRE_HEALTH;
                 } else if (id == R.id.nav_compter) {
                     mToolbar.setTitle("コンピューター");
-                    mGenre = 4;
+                    mGenre = GENRE_COMPUTER;
+                } else if (id == R.id.nav_favorite ) {
+                    mToolbar.setTitle("お気に入り");
+                    mGenre = GENRE_FAVERITE;
                 }
 
                 DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);

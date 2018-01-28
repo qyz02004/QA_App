@@ -20,10 +20,11 @@ import java.util.HashMap;
 public class QuestionDetailActivity extends AppCompatActivity {
 
     private ListView mListView;
-    private Question mQuestion;
+    Question mQuestion;
     private QuestionDetailListAdapter mAdapter;
 
     private DatabaseReference mAnswerRef;
+    private FavoriteQuestion mFavoriteQuestion;
 
     private ChildEventListener mEventListener = new ChildEventListener() {
         @Override
@@ -105,6 +106,7 @@ public class QuestionDetailActivity extends AppCompatActivity {
                 }
             }
         });
+        mFavoriteQuestion = new FavoriteQuestion( this );
 
         DatabaseReference dataBaseReference = FirebaseDatabase.getInstance().getReference();
         mAnswerRef = dataBaseReference.child(Const.ContentsPATH).child(String.valueOf(mQuestion.getGenre())).child(mQuestion.getQuestionUid()).child(Const.AnswersPATH);

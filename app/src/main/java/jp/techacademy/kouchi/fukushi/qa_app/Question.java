@@ -2,6 +2,8 @@ package jp.techacademy.kouchi.fukushi.qa_app;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
 public class Question implements Serializable {
     private String mTitle;
@@ -44,7 +46,7 @@ public class Question implements Serializable {
         return mAnswerArrayList;
     }
 
-    public Question(String title, String body, String name, String uid, String questionUid, int genre, byte[] bytes, ArrayList<Answer> answers) {
+     public Question(String title, String body, String name, String uid, String questionUid, int genre, byte[] bytes, ArrayList<Answer> answers) {
         mTitle = title;
         mBody = body;
         mName = name;
@@ -53,5 +55,5 @@ public class Question implements Serializable {
         mGenre = genre;
         mBitmapArray = bytes.clone();
         mAnswerArrayList = answers;
-    }
+     }
 }
