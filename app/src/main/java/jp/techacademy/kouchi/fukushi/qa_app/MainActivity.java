@@ -324,7 +324,7 @@ public class MainActivity extends AppCompatActivity {
             menuFavorite.setVisible( false );
             // お気に入りが画面だった場合
             if ( mGenre == GENRE_FAVORITE ) {
-                mToolbar.setTitle("QA_App");
+                mToolbar.setTitle(getString(R.string.app_name));
                 // ジャンルなしにする
                 mGenre = GENRE_NONE;
                 setGenre();
