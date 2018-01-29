@@ -194,8 +194,9 @@ public class MainActivity extends AppCompatActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                 // ジャンルを選択していない場合（mGenre == GENRE_NONE）はエラーを表示するだけ
-                if (mGenre == GENRE_NONE) {
+                 // ジャンルを選択していない場合（mGenre == GENRE_NONE）
+                // または(mGenre == GENRE_FAVORITE)はエラーを表示するだけ
+                if (mGenre == GENRE_NONE || mGenre == GENRE_FAVORITE ) {
                     Snackbar.make(view, "ジャンルを選択して下さい", Snackbar.LENGTH_LONG).show();
                     return;
                 }
@@ -261,6 +262,7 @@ public class MainActivity extends AppCompatActivity {
                 if ( mFavoriteRef != null ) {
                     mFavoriteRef.removeEventListener(mFavoriteEventListener);
                 }
+
                 if ( mGenre == GENRE_FAVORITE ) {
                     // お気に入りが選択された場合
                     // ログイン済みのユーザーを取得する
