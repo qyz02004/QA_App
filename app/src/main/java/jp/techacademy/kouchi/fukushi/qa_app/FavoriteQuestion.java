@@ -79,9 +79,10 @@ public class FavoriteQuestion {
                 @Override
                 public void onClick(View view) {
                     String QuestionUid = mActivity.mQuestion.getQuestionUid();
+                    String genre = String.valueOf(mActivity.mQuestion.getGenre());
                     if ( mFavorite == false ){
                         // お気に入り解除→登録
-                        mDatabaseFavoriteRef.child(QuestionUid).setValue(QuestionUid);
+                        mDatabaseFavoriteRef.child(QuestionUid).setValue(genre);
                     } else {
                         // お気に入り登録→解除
                         mDatabaseFavoriteRef.child(QuestionUid).removeValue();
