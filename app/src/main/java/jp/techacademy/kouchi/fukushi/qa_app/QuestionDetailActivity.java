@@ -24,8 +24,52 @@ public class QuestionDetailActivity extends AppCompatActivity {
     private QuestionDetailListAdapter mAdapter;
 
     private DatabaseReference mAnswerRef;
-    private FavoriteQuestion mFavoriteQuestion;
+    private DatabaseReference mDatabaseReference;
+    private DatabaseReference mDatabaseFavoriteRef;
+    private boolean mFavorite;
 
+    // firebaseのお気に入りを監視するリスナー
+    private ChildEventListener mFavoriteEventListener = new ChildEventListener() {
+        @Override
+        public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+            String key = dataSnapshot.getKey();
+            String QuestionUid = mQuestion.getQuestionUid();
+            if (key.equals(QuestionUid)){
+                mFavorite = true;
+                FloatingActionButton favoriteButton = (FloatingActionButton) findViewById(R.id.fab2);
+                favoriteButton.setImageResource(R.drawable.ic_star_black_24dp);
+            }
+        }
+
+        @Override
+        public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+
+        }
+
+        @Override
+        public void onChildRemoved(DataSnapshot dataSnapshot) {
+            String key = dataSnapshot.getKey();
+            String QuestionUid = mQuestion.getQuestionUid();
+            if (key.equals(QuestionUid)){
+                mFavorite = false;
+                FloatingActionButton favoriteButton = (FloatingActionButton) findViewById(R.id.fab2);
+                favoriteButton.setImageResource(R.drawable.ic_star_white_24dp);
+            }
+
+        }
+
+        @Override
+        public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+        }
+
+        @Override
+        public void onCancelled(DatabaseError databaseError) {
+
+        }
+    };
+
+    // firebaseの質問の答えを監視するリスナー
     private ChildEventListener mEventListener = new ChildEventListener() {
         @Override
         public void onChildAdded(DataSnapshot dataSnapshot, String s) {
@@ -106,10 +150,54 @@ public class QuestionDetailActivity extends AppCompatActivity {
                 }
             }
         });
-        mFavoriteQuestion = new FavoriteQuestion( this );
 
         DatabaseReference dataBaseReference = FirebaseDatabase.getInstance().getReference();
         mAnswerRef = dataBaseReference.child(Const.ContentsPATH).child(String.valueOf(mQuestion.getGenre())).child(mQuestion.getQuestionUid()).child(Const.AnswersPATH);
         mAnswerRef.addChildEventListener(mEventListener);
+
+        // お気に入りボタン
+        FloatingActionButton favoriteButton = (FloatingActionButton) findViewById(R.id.fab2);
+        favoriteButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String QuestionUid = mQuestion.getQuestionUid();
+                String genre = String.valueOf(mQuestion.getGenre());
+                if ( mFavorite == false ){
+                    // お気に入り解除→登録
+                    mDatabaseFavoriteRef.child(QuestionUid).setValue(genre);
+                } else {
+                    // お気に入り登録→解除
+                    mDatabaseFavoriteRef.child(QuestionUid).removeValue();
+                }
+            }
+        });
+    }
+
+    @Override
+    protected void onResume(){
+        super.onResume();
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        FloatingActionButton favoriteButton = (FloatingActionButton) findViewById(R.id.fab2);
+        if (user == null) {
+            // ログインしていない
+            // お気に入りボタンを隠す
+            favoriteButton.hide();
+            if ( mDatabaseFavoriteRef != null ) {
+                // お気に入りリスナーを削除
+                mDatabaseFavoriteRef.removeEventListener(mFavoriteEventListener);
+            }
+        } else {
+            // ログイン済み
+            // お気に入りボタンを表示
+            favoriteButton.show();
+            if ( mDatabaseFavoriteRef != null ) {
+                // 前回登録したお気に入りリスナーを削除
+                mDatabaseFavoriteRef.removeEventListener(mFavoriteEventListener);
+            }
+            mDatabaseReference = FirebaseDatabase.getInstance().getReference();
+            mDatabaseFavoriteRef = mDatabaseReference.child(Const.FavoritesPATH).child(user.getUid());
+            // お気に入りリスナーを登録
+            mDatabaseFavoriteRef.addChildEventListener(mFavoriteEventListener);
+        }
     }
 }
