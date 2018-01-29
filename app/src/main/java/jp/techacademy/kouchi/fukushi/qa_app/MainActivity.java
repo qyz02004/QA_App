@@ -141,8 +141,10 @@ public class MainActivity extends AppCompatActivity {
             // 選択したジャンルにリスナーを登録する
             String genre = (String)dataSnapshot.getValue();
             String key = (String)dataSnapshot.getKey();
+            // クエリーでお気に入りとキーが同じ質問を検索する
             Query query = mDatabaseReference.child(Const.ContentsPATH).child(genre).orderByKey().equalTo(key);
             query.addChildEventListener(mQuestionEventListener);
+            // クエリーマップに追加
             mFavoriteQueryMap.put(key,query);
         }
 
@@ -153,14 +155,21 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void onChildRemoved(DataSnapshot dataSnapshot) {
-            // 選択したジャンルにリスナーを削除する
-            String genre = (String)dataSnapshot.getValue();
+            // リスナーを削除する
             String key = (String)dataSnapshot.getKey();
             Query query = mFavoriteQueryMap.get(key);
             query.removeEventListener(mQuestionEventListener);
 
+            // クエリーマップから削除
             mFavoriteQueryMap.remove(key);
-
+            // お気に入りを削除された質問をリストから探して削除
+            for ( int i = 0; i < mQuestionArrayList.size();i++ ) {
+                if ( mQuestionArrayList.get(i).getQuestionUid().equals(key)) {
+                    mQuestionArrayList.remove(i);
+                    mAdapter.notifyDataSetChanged();
+                    break;
+                }
+            }
         }
 
         @Override
@@ -252,16 +261,17 @@ public class MainActivity extends AppCompatActivity {
                 if ( mFavoriteRef != null ) {
                     mFavoriteRef.removeEventListener(mFavoriteEventListener);
                 }
-                if ( mGenre == GENRE_FAVORITE){
-                    // お気に入りにリスナーを登録する
+                if ( mGenre == GENRE_FAVORITE ) {
+                    // お気に入りが選択された場合
                     // ログイン済みのユーザーを取得する
                     FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
 
                     if (user != null) {
+                        // お気に入りにリスナーを登録する
                         mFavoriteRef = mDatabaseReference.child(Const.FavoritesPATH).child(user.getUid());
                         mFavoriteRef.addChildEventListener(mFavoriteEventListener);
                     }
-                }else{
+                } else{
                     // 選択したジャンルにリスナーを登録する
                     mGenreRef = mDatabaseReference.child(Const.ContentsPATH).child(String.valueOf(mGenre));
                     mGenreRef.addChildEventListener(mQuestionEventListener);
