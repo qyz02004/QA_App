@@ -1,8 +1,6 @@
 package jp.techacademy.kouchi.fukushi.qa_app;
 
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
@@ -26,9 +24,11 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -37,7 +37,7 @@ public class MainActivity extends AppCompatActivity {
     static final int GENRE_LIFE = 2;
     static final int GENRE_HEALTH = 3;
     static final int GENRE_COMPUTER = 4;
-    static final int GENRE_FAVERITE = -1;
+    static final int GENRE_FAVORITE = -1;
 
     private Toolbar mToolbar;
 
@@ -46,10 +46,11 @@ public class MainActivity extends AppCompatActivity {
     // --- ここから ---
     private DatabaseReference mDatabaseReference;
     private DatabaseReference mGenreRef;
-    private DatabaseReference mFaveriteRef;
+    private DatabaseReference mFavoriteRef;
     private ListView mListView;
     private ArrayList<Question> mQuestionArrayList;
     private QuestionsListAdapter mAdapter;
+    private HashMap<String, Query> mFavoriteQueryMap;
 
 
     // 質問に追加・変化があった時に受け取る
@@ -137,6 +138,12 @@ public class MainActivity extends AppCompatActivity {
         // 質問が追加された時に呼ばれるメソッド
         @Override
         public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+            // 選択したジャンルにリスナーを登録する
+            String genre = (String)dataSnapshot.getValue();
+            String key = (String)dataSnapshot.getKey();
+            Query query = mDatabaseReference.child(Const.ContentsPATH).child(genre).orderByKey().equalTo(key);
+            query.addChildEventListener(mQuestionEventListener);
+            mFavoriteQueryMap.put(key,query);
         }
 
         //
@@ -146,6 +153,13 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void onChildRemoved(DataSnapshot dataSnapshot) {
+            // 選択したジャンルにリスナーを削除する
+            String genre = (String)dataSnapshot.getValue();
+            String key = (String)dataSnapshot.getKey();
+            Query query = mFavoriteQueryMap.get(key);
+            query.removeEventListener(mQuestionEventListener);
+
+            mFavoriteQueryMap.remove(key);
 
         }
 
@@ -219,7 +233,7 @@ public class MainActivity extends AppCompatActivity {
                     mGenre = GENRE_COMPUTER;
                 } else if (id == R.id.nav_favorite ) {
                     mToolbar.setTitle("お気に入り");
-                    mGenre = GENRE_FAVERITE;
+                    mGenre = GENRE_FAVORITE;
                 }
 
                 DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -235,17 +249,17 @@ public class MainActivity extends AppCompatActivity {
                     mGenreRef.removeEventListener(mQuestionEventListener);
                 }
                 // お気に入りのリスナーを削除
-                if ( mFaveriteRef != null ) {
-                    mFaveriteRef.removeEventListener(mFavoriteEventListener);
+                if ( mFavoriteRef != null ) {
+                    mFavoriteRef.removeEventListener(mFavoriteEventListener);
                 }
-                if ( mGenre == GENRE_FAVERITE ){
+                if ( mGenre == GENRE_FAVORITE){
                     // お気に入りにリスナーを登録する
                     // ログイン済みのユーザーを取得する
                     FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
 
                     if (user != null) {
-                        mFaveriteRef = mDatabaseReference.child(Const.FavoritesPATH).child(user.getUid());
-                        mFaveriteRef.addChildEventListener(mFavoriteEventListener);
+                        mFavoriteRef = mDatabaseReference.child(Const.FavoritesPATH).child(user.getUid());
+                        mFavoriteRef.addChildEventListener(mFavoriteEventListener);
                     }
                 }else{
                     // 選択したジャンルにリスナーを登録する
@@ -263,6 +277,7 @@ public class MainActivity extends AppCompatActivity {
         mAdapter = new QuestionsListAdapter(this);
         mQuestionArrayList = new ArrayList<Question>();
         mAdapter.notifyDataSetChanged();
+        mFavoriteQueryMap = new HashMap<String, Query>();
 
         mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
