@@ -66,14 +66,14 @@ public class FavoriteQuestion {
 
     public FavoriteQuestion(QuestionDetailActivity activity) {
         mActivity = activity;
-        mDatabaseReference = FirebaseDatabase.getInstance().getReference();
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         FloatingActionButton favoriteButton = (FloatingActionButton) activity.findViewById(R.id.fab2);
-        mDatabaseFavoriteRef = mDatabaseReference.child(Const.FavoritesPATH).child(user.getUid());
-        mDatabaseFavoriteRef.addChildEventListener(mEventListener);
         if (user == null) {
             favoriteButton.hide();
         } else {
+            mDatabaseReference = FirebaseDatabase.getInstance().getReference();
+            mDatabaseFavoriteRef = mDatabaseReference.child(Const.FavoritesPATH).child(user.getUid());
+            mDatabaseFavoriteRef.addChildEventListener(mEventListener);
             favoriteButton.show();
             favoriteButton.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -81,13 +81,11 @@ public class FavoriteQuestion {
                     String QuestionUid = mActivity.mQuestion.getQuestionUid();
                     if ( mFavorite == false ){
                         // お気に入り解除→登録
-                       mDatabaseFavoriteRef.child(QuestionUid).setValue(QuestionUid);
+                        mDatabaseFavoriteRef.child(QuestionUid).setValue(QuestionUid);
                     } else {
-//                        mFavorite = false;
                         // お気に入り登録→解除
                         mDatabaseFavoriteRef.child(QuestionUid).removeValue();
                     }
-
                 }
             });
         }
