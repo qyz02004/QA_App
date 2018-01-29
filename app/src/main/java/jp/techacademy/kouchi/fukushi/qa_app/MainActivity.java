@@ -247,38 +247,7 @@ public class MainActivity extends AppCompatActivity {
                     mGenre = GENRE_FAVORITE;
                 }
 
-                DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-                drawer.closeDrawer(GravityCompat.START);
-
-                // 質問のリストをクリアしてから再度Adapterにセットし、AdapterをListViewにセットし直す
-                mQuestionArrayList.clear();
-                mAdapter.setQuestionArrayList(mQuestionArrayList);
-                mListView.setAdapter(mAdapter);
-
-                // ジャンル別のリスナーを削除
-                if (mGenreRef != null) {
-                    mGenreRef.removeEventListener(mQuestionEventListener);
-                }
-                // お気に入りのリスナーを削除
-                if ( mFavoriteRef != null ) {
-                    mFavoriteRef.removeEventListener(mFavoriteEventListener);
-                }
-
-                if ( mGenre == GENRE_FAVORITE ) {
-                    // お気に入りが選択された場合
-                    // ログイン済みのユーザーを取得する
-                    FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-
-                    if (user != null) {
-                        // お気に入りにリスナーを登録する
-                        mFavoriteRef = mDatabaseReference.child(Const.FavoritesPATH).child(user.getUid());
-                        mFavoriteRef.addChildEventListener(mFavoriteEventListener);
-                    }
-                } else{
-                    // 選択したジャンルにリスナーを登録する
-                    mGenreRef = mDatabaseReference.child(Const.ContentsPATH).child(String.valueOf(mGenre));
-                    mGenreRef.addChildEventListener(mQuestionEventListener);
-                }
+                setGenre();
                 return true;
             }
         });
@@ -303,6 +272,41 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    private void setGenre() {
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        drawer.closeDrawer(GravityCompat.START);
+
+        // 質問のリストをクリアしてから再度Adapterにセットし、AdapterをListViewにセットし直す
+        mQuestionArrayList.clear();
+        mAdapter.setQuestionArrayList(mQuestionArrayList);
+        mListView.setAdapter(mAdapter);
+
+        // ジャンル別のリスナーを削除
+        if (mGenreRef != null) {
+            mGenreRef.removeEventListener(mQuestionEventListener);
+        }
+        // お気に入りのリスナーを削除
+        if ( mFavoriteRef != null ) {
+            mFavoriteRef.removeEventListener(mFavoriteEventListener);
+        }
+
+        if ( mGenre == GENRE_FAVORITE ) {
+            // お気に入りが選択された場合
+            // ログイン済みのユーザーを取得する
+            FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+
+            if (user != null) {
+                // お気に入りにリスナーを登録する
+                mFavoriteRef = mDatabaseReference.child(Const.FavoritesPATH).child(user.getUid());
+                mFavoriteRef.addChildEventListener(mFavoriteEventListener);
+            }
+        } else{
+            // 選択したジャンルにリスナーを登録する
+            mGenreRef = mDatabaseReference.child(Const.ContentsPATH).child(String.valueOf(mGenre));
+            mGenreRef.addChildEventListener(mQuestionEventListener);
+        }
+    }
+
     @Override
     public void onResume() {
         super.onResume();
@@ -318,6 +322,13 @@ public class MainActivity extends AppCompatActivity {
         else {
             // ログインするまではお気に入りメニューを隠しておく
             menuFavorite.setVisible( false );
+            // お気に入りが画面だった場合
+            if ( mGenre == GENRE_FAVORITE ) {
+                mToolbar.setTitle("QA_App");
+                // ジャンルなしにする
+                mGenre = GENRE_NONE;
+                setGenre();
+            }
         }
     }
 
