@@ -46,13 +46,14 @@ public class MainActivity extends AppCompatActivity {
     // --- ここから ---
     private DatabaseReference mDatabaseReference;
     private DatabaseReference mGenreRef;
+    private DatabaseReference mFaveriteRef;
     private ListView mListView;
     private ArrayList<Question> mQuestionArrayList;
     private QuestionsListAdapter mAdapter;
 
 
-    // データに追加・変化があった時に受け取る
-    private ChildEventListener mEventListener = new ChildEventListener() {
+    // 質問に追加・変化があった時に受け取る
+    private ChildEventListener mQuestionEventListener = new ChildEventListener() {
         // 質問が追加された時に呼ばれるメソッド
         @Override
         public void onChildAdded(DataSnapshot dataSnapshot, String s) {
@@ -130,7 +131,34 @@ public class MainActivity extends AppCompatActivity {
 
         }
     };
-    // --- ここまで追加する ---
+
+    // お気に入りに追加・変化があった時に受け取る
+    private ChildEventListener mFavoriteEventListener = new ChildEventListener() {
+        // 質問が追加された時に呼ばれるメソッド
+        @Override
+        public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+        }
+
+        //
+        @Override
+        public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+        }
+
+        @Override
+        public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+        }
+
+        @Override
+        public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+        }
+
+        @Override
+        public void onCancelled(DatabaseError databaseError) {
+
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -202,13 +230,28 @@ public class MainActivity extends AppCompatActivity {
                 mAdapter.setQuestionArrayList(mQuestionArrayList);
                 mListView.setAdapter(mAdapter);
 
-                // 選択したジャンルにリスナーを登録する
+                // ジャンル別のリスナーを削除
                 if (mGenreRef != null) {
-                    mGenreRef.removeEventListener(mEventListener);
+                    mGenreRef.removeEventListener(mQuestionEventListener);
                 }
-                mGenreRef = mDatabaseReference.child(Const.ContentsPATH).child(String.valueOf(mGenre));
-                mGenreRef.addChildEventListener(mEventListener);
-                // --- ここまで追加する ---
+                // お気に入りのリスナーを削除
+                if ( mFaveriteRef != null ) {
+                    mFaveriteRef.removeEventListener(mFavoriteEventListener);
+                }
+                if ( mGenre == GENRE_FAVERITE ){
+                    // お気に入りにリスナーを登録する
+                    // ログイン済みのユーザーを取得する
+                    FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+
+                    if (user != null) {
+                        mFaveriteRef = mDatabaseReference.child(Const.FavoritesPATH).child(user.getUid());
+                        mFaveriteRef.addChildEventListener(mFavoriteEventListener);
+                    }
+                }else{
+                    // 選択したジャンルにリスナーを登録する
+                    mGenreRef = mDatabaseReference.child(Const.ContentsPATH).child(String.valueOf(mGenre));
+                    mGenreRef.addChildEventListener(mQuestionEventListener);
+                }
                 return true;
             }
         });
