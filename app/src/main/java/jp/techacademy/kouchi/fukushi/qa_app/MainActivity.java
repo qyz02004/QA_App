@@ -306,6 +306,15 @@ public class MainActivity extends AppCompatActivity {
                 mFavoriteRef.addChildEventListener(mFavoriteEventListener);
             }
         } else{
+            // お気に入り以外のジャンルが選択された場合
+            // お気に入りのクエリーが登録されていたら全要素削除
+            if ( !mFavoriteQueryMap.isEmpty() ) {
+                for (String key : mFavoriteQueryMap.keySet()) {
+                    Query query = mFavoriteQueryMap.get(key);
+                    query.removeEventListener(mQuestionEventListener);
+                }
+                mFavoriteQueryMap.clear();
+            }
             // 選択したジャンルにリスナーを登録する
             mGenreRef = mDatabaseReference.child(Const.ContentsPATH).child(String.valueOf(mGenre));
             mGenreRef.addChildEventListener(mQuestionEventListener);
