@@ -1,6 +1,8 @@
 package jp.techacademy.kouchi.fukushi.qa_app;
 
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
@@ -37,7 +39,8 @@ public class QuestionDetailActivity extends AppCompatActivity {
             if (key.equals(QuestionUid)){
                 mFavorite = true;
                 FloatingActionButton favoriteButton = (FloatingActionButton) findViewById(R.id.fab2);
-                favoriteButton.setImageResource(R.drawable.ic_star_black_24dp);
+                // お気に入りボタンのアイコンを黄色にする
+                favoriteButton.setColorFilter(Color.parseColor("yellow"), PorterDuff.Mode.SRC_IN);
             }
         }
 
@@ -53,7 +56,8 @@ public class QuestionDetailActivity extends AppCompatActivity {
             if (key.equals(QuestionUid)){
                 mFavorite = false;
                 FloatingActionButton favoriteButton = (FloatingActionButton) findViewById(R.id.fab2);
-                favoriteButton.setImageResource(R.drawable.ic_star_white_24dp);
+                // お気に入りボタンのアイコンを白にする。
+                favoriteButton.setColorFilter(Color.parseColor("white"), PorterDuff.Mode.SRC_IN);
             }
 
         }
@@ -69,7 +73,7 @@ public class QuestionDetailActivity extends AppCompatActivity {
         }
     };
 
-    // firebaseの質問の答えを監視するリスナー
+    // firebaseの質問を監視するリスナー
     private ChildEventListener mEventListener = new ChildEventListener() {
         @Override
         public void onChildAdded(DataSnapshot dataSnapshot, String s) {
