@@ -166,10 +166,11 @@ public class MainActivity extends AppCompatActivity {
             for ( int i = 0; i < mQuestionArrayList.size();i++ ) {
                 if ( mQuestionArrayList.get(i).getQuestionUid().equals(key)) {
                     mQuestionArrayList.remove(i);
-                    mAdapter.notifyDataSetChanged();
                     break;
                 }
             }
+            // アダプターに質問リストが変更されたことを通知
+            mAdapter.notifyDataSetChanged();
         }
 
         @Override
